@@ -2,8 +2,9 @@
 
 namespace uREPL
 {
+	using System.IO;
 
-public class CompileResult
+	public class CompileResult
 {
 	public enum Type { Success, Error, Partial }
 
@@ -16,6 +17,9 @@ public class CompileResult
 public static class Evaluator
 {
 	static private bool isInitialized = false;
+	private static Mono.CSharp.Evaluator evaluatorInstance;
+	private static Mono.CSharp.CompilerContext evaluatorCtx;
+	private static Mono.CSharp.ReportPrinter evaluatorDefaultReportPrinter;
 
 #if UNITY_EDITOR
 	[UnityEditor.MenuItem("Assets/Create/uREPL")]
@@ -32,6 +36,17 @@ public static class Evaluator
 	{
 		if (isInitialized) return;
 		isInitialized = true;
+		
+		// Create Evaluator
+		evaluatorDefaultReportPrinter = new Mono.CSharp.ConsoleReportPrinter();
+		var settings = new Mono.CSharp.CompilerSettings();
+//                settings.AssemblyReferences = new List<string> {
+//                    Assembly.GetExecutingAssembly().FullName
+//                };
+//                settings.LoadDefaultReferences = false;
+		evaluatorCtx = new Mono.CSharp.CompilerContext(
+			settings, evaluatorDefaultReportPrinter);
+		evaluatorInstance = new Mono.CSharp.Evaluator(evaluatorCtx);
 
 		ReferenceAllAssemblies();
 		SetUsings();
@@ -44,21 +59,27 @@ public static class Evaluator
 	{
 		// See the detailed information about this hack at:
 		//   http://forum.unity3d.com/threads/mono-csharp-evaluator.102162/
-		for (int n = 0; n < 2;) {
+		// not relevant for new Mono.CSharp and Unity
+//		for (int n = 0; n < 2;) {
 			foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies()) {
 				if (assembly == null) continue;
-				Mono.CSharp.Evaluator.ReferenceAssembly(assembly);
+//				Mono.CSharp.Evaluator.ReferenceAssembly(assembly);
+				evaluatorInstance.ReferenceAssembly(assembly);
 			}
-			Mono.CSharp.Evaluator.Evaluate("null;");
-			n++;
-		}
+//			Mono.CSharp.Evaluator.Evaluate("null;");
+			evaluatorInstance.Evaluate("null;");
+//			n++;
+//		}
 	}
 
 	static private void SetUsings()
 	{
-		Mono.CSharp.Evaluator.Run("using uREPL;");
-		Mono.CSharp.Evaluator.Run("using System;");
-		Mono.CSharp.Evaluator.Run("using UnityEngine;");
+//		Mono.CSharp.Evaluator.Run("using uREPL;");
+//		Mono.CSharp.Evaluator.Run("using System;");
+//		Mono.CSharp.Evaluator.Run("using UnityEngine;");
+		evaluatorInstance.Run("using uREPL;");
+		evaluatorInstance.Run("using System;");
+		evaluatorInstance.Run("using UnityEngine;");
 		// #if UNITY_EDITOR
 		// Mono.CSharp.Evaluator.Run("using UnityEditor;");
 		// #endif
@@ -83,16 +104,19 @@ public static class Evaluator
 		object ret = null;
 		bool hasReturnValue = false;
 
-		var originalOutput = Mono.CSharp.Evaluator.MessageOutput;
+//		var originalOutput = Mono.CSharp.Evaluator.MessageOutput;
 		var errorWriter = new System.IO.StringWriter();
 		bool isPartial = false;
-		Mono.CSharp.Evaluator.MessageOutput = errorWriter;
+//		Mono.CSharp.Evaluator.MessageOutput = errorWriter;
+		SetEvaluatorMessageOutput(errorWriter);
 		try {
-			isPartial = Mono.CSharp.Evaluator.Evaluate(code, out ret, out hasReturnValue) != null;
+//			isPartial = Mono.CSharp.Evaluator.Evaluate(code, out ret, out hasReturnValue) != null;
+			isPartial = evaluatorInstance.Evaluate(code, out ret, out hasReturnValue) != null;
 		} catch (System.Exception e) {
 			errorWriter.Write(e.Message);
 		}
-		Mono.CSharp.Evaluator.MessageOutput = originalOutput;
+//		Mono.CSharp.Evaluator.MessageOutput = originalOutput;
+		SetDefaultEvaluatorMessageOutput();
 
 		var error = errorWriter.ToString();
 		if (!string.IsNullOrEmpty(error)) {
@@ -119,17 +143,20 @@ public static class Evaluator
 
 	static public string[] GetCompletions(string input, out string prefix)
 	{
-        return Mono.CSharp.Evaluator.GetCompletions(input, out prefix);
+//        return Mono.CSharp.Evaluator.GetCompletions(input, out prefix);
+		return evaluatorInstance.GetCompletions(input, out prefix);
 	}
 
 	static public string GetVars()
 	{
-		return Mono.CSharp.Evaluator.GetVars();
+//		return Mono.CSharp.Evaluator.GetVars();
+		return evaluatorInstance.GetVars();
 	}
 
 	static public string GetUsing()
 	{
-		return Mono.CSharp.Evaluator.GetUsing();
+//		return Mono.CSharp.Evaluator.GetUsing();
+		return evaluatorInstance.GetUsing();
 	}
 
 	[Command(name = "show vars", description = "Show all local variables")]
@@ -142,6 +169,17 @@ public static class Evaluator
 	static public void ShowUsing()
 	{
 		Log.Output(GetUsing());
+	}
+
+	private static void SetEvaluatorMessageOutput(StringWriter messageOutput = null)
+	{
+		var reportPrinter = new Mono.CSharp.ConsoleReportPrinter(messageOutput);
+		evaluatorCtx?.Report.SetPrinter(reportPrinter);
+	}
+
+	private static void SetDefaultEvaluatorMessageOutput()
+	{
+		evaluatorCtx?.Report.SetPrinter(evaluatorDefaultReportPrinter);
 	}
 }
 
