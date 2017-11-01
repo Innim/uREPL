@@ -15,6 +15,9 @@
 *.pidb
 *.booproj
 
+# Rider cache
+/.idea/
+
 # Unity3D generated meta files
 *.pidb.meta
 
