@@ -159,6 +159,24 @@ public class Window : MonoBehaviour
 		SetActive(false);
 	}
 
+	/// <summary>
+	/// Set key code to open console window.
+	/// </summary>
+	/// <param name="code"></param>
+	public void SetOpenKey(KeyCode code)
+	{
+		keyBinding_.openKey = code;
+	}
+
+	/// <summary>
+	/// Set key code to close console window.
+	/// </summary>
+	/// <param name="code"></param>
+	public void SetCloseKey(KeyCode code)
+	{
+		keyBinding_.closeKey = code;
+	}
+
 	private void SetActive(bool active)
 	{
 		GetComponent<Canvas>().enabled = active;

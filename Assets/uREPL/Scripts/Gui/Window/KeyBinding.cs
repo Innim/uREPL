@@ -39,8 +39,8 @@ public class KeyBinding
 	}
 
 	private KeyEvent keyEvent_ = new KeyEvent();
-	[SerializeField] KeyCode openKey = KeyCode.F1;
-	[SerializeField] KeyCode closeKey = KeyCode.F1;
+	[SerializeField] private KeyCode _openKey = KeyCode.F1;
+	[SerializeField] private KeyCode _closeKey = KeyCode.F1;
 
 	public void Initialize(Window parent)
 	{
@@ -48,6 +48,24 @@ public class KeyBinding
 		InitializeArrowKeys();
 		InitializeCommands();
 		InitializeEmacsLikeKeys();
+	}
+
+	/// <summary>
+	/// Key code to open console window.
+	/// </summary>
+	public KeyCode openKey
+	{
+		get { return _openKey; }
+		set { _openKey = value; }
+	}
+	
+	/// <summary>
+	/// Key code to close console window.
+	/// </summary>
+	public KeyCode closeKey 
+	{
+		get { return _closeKey; }
+		set { _closeKey = value; }
 	}
 
 	private void InitializeArrowKeys()
