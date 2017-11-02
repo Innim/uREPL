@@ -26,12 +26,12 @@ Demo
 Environment
 -----------
 - Mac / Windows
-- Unity 5
+- Unity 2017.2
 
 
 Installation
 ------------
-Please download the latest *uREPL.unitypackage* from the [release page](https://github.com/hecomi/uREPL/releases).
+Please download the latest *uREPL.unitypackage* from the [release page](https://github.com/Innim/uREPL/releases).
 
 
 Usage
