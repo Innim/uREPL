@@ -182,7 +182,8 @@ public class KeyBinding
 	{
 		ToggleWindowByKeys();
 
-		if (window_.isOpen) {
+		// TODO: why it fails?
+		if (window_?.isOpen ?? false) {
 			if (inputField.isFocused) {
 				keyEvent_.Check();
 			} else {
