@@ -21,17 +21,6 @@ public static class Evaluator
 	private static Mono.CSharp.CompilerContext evaluatorCtx;
 	private static Mono.CSharp.ReportPrinter evaluatorDefaultReportPrinter;
 
-#if UNITY_EDITOR
-	[UnityEditor.MenuItem("Assets/Create/uREPL")]
-	[UnityEditor.MenuItem("GameObject/Create Other/uREPL")]
-	static public void Create()
-	{
-		var prefab = Resources.Load("uREPL/Prefabs/uREPL");
-		var instance = MonoBehaviour.Instantiate(prefab);
-		instance.name = "uREPL";
-	}
-#endif
-
 	static public void Initialize()
 	{
 		if (isInitialized) return;
